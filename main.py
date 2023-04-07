@@ -1,16 +1,53 @@
-# This is a sample Python script.
-
-# Press Shift+F10 to execute it or replace it with your code.
-# Press Double Shift to search everywhere for classes, files, tool windows, actions, and settings.
+from sly import Parser
+from calclex import CalcLexer
 
 
-def print_hi(name):
-    # Use a breakpoint in the code line below to debug your script.
-    print(f'Hi, {name}')  # Press Ctrl+F8 to toggle the breakpoint.
+class CalcParser(Parser):
+    # Get the token list from the lexer (required)
+    tokens = CalcLexer.tokens
+
+    # Grammar rules and actions
+    @_('expr PLUS term')
+    def expr(self, p):
+        return p.expr + p.term
+
+    @_('expr MINUS term')
+    def expr(self, p):
+        return p.expr - p.term
+
+    @_('term')
+    def expr(self, p):
+        return p.term
+
+    @_('term TIMES factor')
+    def term(self, p):
+        return p.term * p.factor
+
+    @_('term DIVIDE factor')
+    def term(self, p):
+        return p.term / p.factor
+
+    @_('factor')
+    def term(self, p):
+        return p.factor
+
+    @_('NUMBER')
+    def factor(self, p):
+        return p.NUMBER
+
+    @_('LPAREN expr RPAREN')
+    def factor(self, p):
+        return p.expr
 
 
-# Press the green button in the gutter to run the script.
 if __name__ == '__main__':
-    print_hi('PyCharm')
+    lexer = CalcLexer()
+    parser = CalcParser()
 
-# See PyCharm help at https://www.jetbrains.com/help/pycharm/
+    while True:
+        try:
+            text = input('calc > ')
+            result = parser.parse(lexer.tokenize(text))
+            print(result)
+        except EOFError:
+            break
